@@ -10,6 +10,7 @@ r = redis.Redis(host='localhost', port=6379, decode_responses=True)
 r.flushall()
 
 class TeamMetaData(BaseModel):
+    team_id: Optional[str] = None
     team_name: str
     city: str
     owner: str
