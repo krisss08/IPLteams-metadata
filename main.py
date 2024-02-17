@@ -16,6 +16,7 @@ class TeamMetaData(BaseModel):
     owner: str
     coach: str
     captain: str
+    established_year: int
 
 class TeamExistsResponse(BaseModel):
     team_id: str
@@ -34,7 +35,7 @@ async def create_team(team_data: TeamMetaData):
     r.hmset(team_id, team_data_dict)
     r.hset("team_names", team_data.team_name, team_id)
     
-    return team_data
+    return team_data_dict
 
 @app.get("/teams/{team_id}", response_model=TeamMetaData)
 async def read_team(team_id: str):
