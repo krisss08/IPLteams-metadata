@@ -16,7 +16,6 @@ class TeamMetaData(BaseModel):
     owner: str
     coach: str
     captain: str
-    established_year: int
 
 class TeamExistsResponse(BaseModel):
     team_id: str
