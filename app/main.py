@@ -13,10 +13,10 @@ class TeamMetaData(BaseModel):
     team_id: Optional[str] = None
     team_name: str
     city: str
-    owner: str
-    coach: str
+    owner: Optional[str]
+    coach: Optional[str]
     captain: str
-    established_year: int
+    established_year: Optional[int]
 
 class TeamExistsResponse(BaseModel):
     team_id: str
