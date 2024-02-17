@@ -20,6 +20,7 @@ class TeamExistsResponse(BaseModel):
     team_id: str
     message: str
 
+
 @app.post("/teams/", response_model=Union[TeamMetaData, TeamExistsResponse])
 async def create_team(team_data: TeamMetaData):
     existing_team_id = r.hget("team_names", team_data.team_name)
