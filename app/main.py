@@ -161,7 +161,6 @@ async def list_teams():
         - Converts the retrieved metadata to a 'TeamMetaData' object and appends it to the list.
         - Returns the list containing the metadata of all teams.
     """
-
     teams = []
     for key in r.scan_iter(match="*"):
         if key != "team_names":  
@@ -183,7 +182,6 @@ async def list_team_names():
         - Appends dictionaries containing 'team_name' and 'team_id' keys to the list.
         - Returns the list containing the names and IDs of all teams.
     """
-
     team_names = []
     for team_name, team_id in r.hscan_iter("team_names"):
         team_names.append({"team_name": team_name, "team_id": team_id})
