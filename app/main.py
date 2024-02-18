@@ -13,16 +13,16 @@ class TeamMetaData(BaseModel):
     team_id: Optional[str] = None
     team_name: str
     city: str
-    owner: Optional[str]
-    coach: Optional[str]
+    owner: str
+    coach: str
     captain: str
-    established_year: Optional[int]
+    established_year: int
 
 class TeamExistsResponse(BaseModel):
     team_id: str
     message: str
 
-@app.post("/teams/", response_model=Union[TeamMetaData, TeamExistsResponse])
+@app.post("/teams/", response_model=Union[TeamMetaDataResponse, TeamExistsResponse])
 async def create_team(team_data: TeamMetaData):
     """
     Creates a new team with the provided metadata.
@@ -54,13 +54,14 @@ async def create_team(team_data: TeamMetaData):
     team_id = str(uuid.uuid4())
     team_data_dict = team_data.model_dump()
     team_data_dict["team_id"] = team_id
+    team_data_dict["year_won"] = str(team_data_dict["year_won"])
     
     r.hmset(team_id, team_data_dict)
     r.hset("team_names", team_data.team_name, team_id)
     
     return team_data_dict
 
-@app.get("/teams/{team_id}", response_model=TeamMetaData)
+@app.get("/teams/{team_id}", response_model=TeamMetaDataResponse)
 async def read_team(team_id: str):
     """
     Retrieves the metadata of a team with the specified team ID.
@@ -82,9 +83,9 @@ async def read_team(team_id: str):
     team_data = r.hgetall(team_id)
     if not team_data:
         raise HTTPException(status_code=404, detail="Team not found")
-    return TeamMetaData(**team_data)
+    return TeamMetaDataResponse(**team_data)
 
-@app.put("/teams/{team_id}", response_model=TeamMetaData)
+@app.put("/teams/{team_id}", response_model=TeamMetaDataResponse)
 async def update_team(team_id: str, team_data: TeamMetaData):
     """
     Updates the metadata of a team with the specified team ID.
@@ -110,8 +111,10 @@ async def update_team(team_id: str, team_data: TeamMetaData):
     if not r.exists(team_id):
         raise HTTPException(status_code=404, detail="Team not found")
     team_data.team_id = team_id
-    r.hmset(team_id, team_data.dict())
-    return team_data
+    team_data_dict = team_data.model_dump()
+    team_data_dict["year_won"] = str(team_data_dict["year_won"])
+    r.hmset(team_id, team_data_dict)
+    return team_data_dict
 
 @app.delete("/teams/{team_id}")
 async def delete_team(team_id: str):
@@ -145,9 +148,8 @@ async def delete_team(team_id: str):
             break
     return {"message": "Team deleted successfully"}
 
-@app.get("/teams/", response_model=List[TeamMetaData])
+@app.get("/teams/", response_model=List[TeamMetaDataResponse])
 async def list_teams():
-
     """
     Lists the metadata of all teams.
 
@@ -165,7 +167,7 @@ async def list_teams():
     for key in r.scan_iter(match="*"):
         if key != "team_names":  
             team_data = r.hgetall(key)
-            teams.append(TeamMetaData(**team_data))
+            teams.append(TeamMetaDataResponse(**team_data))
     return teams
 
 @app.get("/team_names/", response_model=List[dict])
