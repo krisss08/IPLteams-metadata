@@ -12,16 +12,18 @@ r.flushall()
 class TeamMetaData(BaseModel):
     team_id: Optional[str] = None
     team_name: str
-    city: str
-    owner: str
-    coach: str
-    captain: str
+    list_val: List[int]
+
+class TeamMetaData2(BaseModel):
+    team_id: Optional[str] = None
+    team_name: str
+    list_val: str
 
 class TeamExistsResponse(BaseModel):
     team_id: str
     message: str
 
-@app.post("/teams/", response_model=Union[TeamMetaData, TeamExistsResponse])
+@app.post("/teams/", response_model=Union[TeamMetaData2, TeamExistsResponse])
 async def create_team(team_data: TeamMetaData):
     """
     Creates a new team with the provided metadata.
@@ -53,6 +55,7 @@ async def create_team(team_data: TeamMetaData):
     team_id = str(uuid.uuid4())
     team_data_dict = team_data.model_dump()
     team_data_dict["team_id"] = team_id
+    team_data_dict["list_val"] = str(team_data_dict["list_val"])
     
     r.hmset(team_id, team_data_dict)
     r.hset("team_names", team_data.team_name, team_id)
